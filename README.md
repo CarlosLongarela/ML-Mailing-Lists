@@ -139,15 +139,15 @@ O plugin inclúe CSS por defecto, pero podes personalizalo usando as variables C
 **Filtros:**
 ```php
 // Personalizar datos antes de gardar a subscrición
-add_filter('ml_subscription_name', 'mi_filtro_nome', 10, 2);
-add_filter('ml_subscription_surname', 'mi_filtro_apelido', 10, 2);
-add_filter('ml_subscription_email', 'mi_filtro_email', 10, 2);
+add_filter( 'ml_subscription_name', 'mi_filtro_nome', 10, 2 );
+add_filter( 'ml_subscription_surname', 'mi_filtro_apelido', 10, 2 );
+add_filter( 'ml_subscription_email', 'mi_filtro_email', 10, 2 );
 ```
 
 **Accións:**
 ```php
 // Executar código despois de crear unha subscrición
-add_action('ml_subscription_created', 'mi_funcion_post_subscripcion', 10, 3);
+add_action( 'ml_subscription_created', 'mi_funcion_post_subscripcion', 10, 3 );
 ```
 
 ## 🛡️ Características de Seguridade
@@ -250,7 +250,7 @@ Usa o ID da lista no teu shortcode:
 Os logs de envío almacénanse na base de datos e poden consultarse desde o código:
 
 ```php
-$logs = get_option('ml_email_logs', array());
+$logs = get_option( 'ml_email_logs', array() );
 ```
 
 ## 📝 Changelog
@@ -303,8 +303,8 @@ GPL2 - Consulta el archivo de licencia para más detalles.
 ## 🙏 Agradecementos
 
 - Comunidade de WordPress
-- Desenvolvedores de Pods Plugin
-- Beta testers e usuarios que proporcionaron feedback
+- Desenvolvedores do Plugin Pods
+- Beta testers e usuarios que proporcionaron o feedback
 
 ---
 
