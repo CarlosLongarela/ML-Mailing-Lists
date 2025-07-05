@@ -457,3 +457,316 @@ function ml_get_user_ip() {
 
 // Register the shortcode.
 add_shortcode( 'ml_subscription_form', 'ml_subscription_form_shortcode' );
+
+/**
+ * Add export functionality to the mailing lists admin page.
+ */
+add_action( 'admin_init', 'ml_handle_export_requests' );
+add_action( 'restrict_manage_posts', 'ml_add_export_buttons' );
+add_action( 'admin_head', 'ml_add_export_buttons_styles' );
+
+/**
+ * Handle export requests for CSV and TXT formats.
+ */
+function ml_handle_export_requests() {
+	// Check if this is an export request.
+	if ( ! isset( $_GET['ml_export'] ) || ! in_array( $_GET['ml_export'], array( 'csv', 'txt' ) ) ) {
+		return;
+	}
+
+	// Verify nonce for security.
+	if ( ! isset( $_GET['ml_export_nonce'] ) || ! wp_verify_nonce( $_GET['ml_export_nonce'], 'ml_export_emails' ) ) {
+		wp_die( 'Error de seguridad. Acceso denegado.' );
+	}
+
+	// Check user permissions.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'No tienes permisos para realizar esta acción.' );
+	}
+
+	$format  = sanitize_text_field( $_GET['ml_export'] );
+	$list_id = isset( $_GET['ml_list_filter'] ) ? intval( $_GET['ml_list_filter'] ) : 0;
+
+	// Get emails based on filter.
+	$emails = ml_get_emails_for_export( $list_id );
+
+	if ( empty( $emails ) ) {
+		wp_die( 'No se encontraron emails para exportar.' );
+	}
+
+	// Generate filename.
+	$date      = gmdate( 'Y-m-d_H-i-s' );
+	$list_name = '';
+
+	if ( $list_id > 0 ) {
+		$term      = get_term( $list_id, 'ml_lista' );
+		$list_name = $term && ! is_wp_error( $term ) ? '_' . sanitize_file_name( $term->name ) : '';
+	}
+
+	$filename = 'mailing_list' . $list_name . '_' . $date . '.' . $format;
+
+	// Set headers for download.
+	header( 'Content-Type: application/octet-stream' );
+	header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+	header( 'Pragma: no-cache' );
+	header( 'Expires: 0' );
+
+	// Output based on format.
+	if ( 'csv'=== $format ) {
+		ml_output_csv( $emails );
+	} else {
+		ml_output_txt( $emails );
+	}
+
+	exit;
+}
+
+/**
+ * Get emails for export based on list filter.
+ *
+ * @param int $list_id The list ID to filter by (0 for all lists).
+ * @return array Array of email data.
+ */
+function ml_get_emails_for_export( $list_id = 0 ) {
+	$args = array(
+		'post_type'      => 'ml_mailing_lists',
+		'post_status'    => 'publish',
+		'posts_per_page' => -1,
+		'meta_query'     => array(
+			array(
+				'key'     => 'ml_email',
+				'compare' => 'EXISTS',
+			),
+		),
+	);
+
+	// Add taxonomy filter if specific list is selected.
+	if ( $list_id > 0 ) {
+		$args['tax_query'] = array(
+			array(
+				'taxonomy' => 'ml_lista',
+				'field'    => 'term_id',
+				'terms'    => $list_id,
+			),
+		);
+	}
+
+	$posts  = get_posts( $args );
+	$emails = array();
+
+	foreach ( $posts as $post ) {
+		$name              = get_post_meta( $post->ID, 'ml_name', true );
+		$surname           = get_post_meta( $post->ID, 'ml_surname', true );
+		$email             = get_post_meta( $post->ID, 'ml_email', true );
+		$subscription_date = get_post_meta( $post->ID, 'ml_subscription_date', true );
+
+		// Get list names.
+		$terms      = wp_get_post_terms( $post->ID, 'ml_lista' );
+		$list_names = array();
+		if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $term ) {
+				$list_names[] = $term->name;
+			}
+		}
+
+		$emails[] = array(
+			'name'              => $name,
+			'surname'           => $surname,
+			'email'             => $email,
+			'subscription_date' => $subscription_date ? $subscription_date : $post->post_date,
+			'lists'             => implode( ', ', $list_names ),
+		);
+	}
+
+	return $emails;
+}
+
+/**
+ * Output emails in CSV format.
+ *
+ * @param array $emails Array of email data.
+ */
+function ml_output_csv( $emails ) {
+	// Open output stream.
+	$output = fopen( 'php://output', 'w' );
+
+	// Add BOM for UTF-8.
+	fprintf( $output, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
+
+	// Add CSV headers.
+	fputcsv( $output, array( 'Nombre', 'Apellidos', 'Email', 'Fecha Suscripción', 'Listas' ), ';' );
+
+	// Add data rows.
+	foreach ( $emails as $email_data ) {
+		fputcsv(
+			$output,
+			array(
+				$email_data['name'],
+				$email_data['surname'],
+				$email_data['email'],
+				$email_data['subscription_date'],
+				$email_data['lists'],
+			),
+			';',
+		);
+	}
+
+	fclose( $output );
+}
+
+/**
+ * Output emails in TXT format.
+ *
+ * @param array $emails Array of email data.
+ */
+function ml_output_txt( $emails ) {
+	echo "LISTA DE CORREOS ELECTRÓNICOS\n";
+	echo "=============================\n";
+	echo 'Exportado el: ' . gmdate( 'd/m/Y H:i:s' ) . "\n";
+	echo 'Total de emails: ' . count( $emails ) . "\n\n";
+
+	foreach ( $emails as $email_data ) {
+		echo 'Nombre: ' . $email_data['name'] . ' ' . $email_data['surname'] . "\n";
+		echo 'Email: ' . $email_data['email'] . "\n";
+		echo 'Fecha: ' . $email_data['subscription_date'] . "\n";
+		echo 'Listas: ' . $email_data['lists'] . "\n";
+		echo "------------------------\n";
+	}
+}
+
+/**
+ * Add export buttons to the admin posts list page.
+ */
+function ml_add_export_buttons() {
+	global $typenow;
+
+	// Only show on mailing lists post type.
+	if ( 'ml_mailing_lists' !== $typenow ) {
+		return;
+	}
+
+	$export_nonce = wp_create_nonce( 'ml_export_emails' );
+	$current_url  = remove_query_arg( array( 'ml_export', 'ml_export_nonce', 'ml_list_filter' ) );
+
+	// Get current list filter if any.
+	$current_list = isset( $_GET['ml_lista'] ) ? intval( $_GET['ml_lista'] ) : 0;
+
+	// Build export URLs.
+	$csv_url = add_query_arg(
+		array(
+			'ml_export'        => 'csv',
+			'ml_export_nonce'  => $export_nonce,
+			'ml_list_filter'   => $current_list,
+		),
+		$current_url
+	);
+
+	$txt_url = add_query_arg(
+		array(
+			'ml_export'       => 'txt',
+			'ml_export_nonce' => $export_nonce,
+			'ml_list_filter'  => $current_list,
+		),
+		$current_url
+	);
+
+	?>
+	<div class="ml-export-buttons">
+		<a href="<?php echo esc_url( $csv_url ); ?>" class="button button-primary ml-export-csv">
+			📊 Exportar CSV
+		</a>
+		<a href="<?php echo esc_url( $txt_url ); ?>" class="button button-secondary ml-export-txt">
+			📄 Exportar TXT
+		</a>
+	</div>
+	<?php
+}
+
+/**
+ * Add CSS styles for export buttons.
+ */
+function ml_add_export_buttons_styles() {
+	global $pagenow, $typenow;
+
+	// Only add on the mailing lists admin page.
+	if ( 'edit.php' !== $pagenow || 'ml_mailing_lists' !== $typenow ) {
+		return;
+	}
+	?>
+	<style type="text/css">
+	:root {
+		--ml-export-csv-bg: #00a32a;
+		--ml-export-csv-hover-bg: #008a20;
+		--ml-export-txt-bg: #2271b1;
+		--ml-export-txt-hover-bg: #135e96;
+	}
+
+	.ml-export-buttons {
+		display: inline-block;
+		margin-left: 8px;
+		vertical-align: top;
+	}
+
+	.ml-export-buttons .button {
+		height: 30px;
+		line-height: 28px;
+		padding: 0 12px;
+		font-size: 13px;
+		margin-right: 4px;
+		text-decoration: none;
+	}
+
+	.ml-export-csv {
+		background-color: var(--ml-export-csv-bg) !important;
+		border-color: var(--ml-export-csv-bg) !important;
+		color: white !important;
+	}
+
+	.ml-export-csv:hover,
+	.ml-export-csv:focus {
+		background-color: var(--ml-export-csv-hover-bg) !important;
+		border-color: var(--ml-export-csv-hover-bg) !important;
+		color: white !important;
+	}
+
+	.ml-export-txt {
+		background-color: var(--ml-export-txt-bg) !important;
+		border-color: var(--ml-export-txt-bg) !important;
+		color: white !important;
+	}
+
+	.ml-export-txt:hover,
+	.ml-export-txt:focus {
+		background-color: var(--ml-export-txt-hover-bg) !important;
+		border-color: var(--ml-export-txt-hover-bg) !important;
+		color: white !important;
+	}
+
+	@media screen and (max-width: 782px) {
+		.ml-export-buttons {
+			margin: 5px 0;
+			display: block;
+		}
+
+		.ml-export-buttons .button {
+			margin-bottom: 5px;
+			display: inline-block;
+		}
+	}
+	</style>
+	<?php
+}
+
+/**
+ * Add admin notice for successful exports.
+ */
+function ml_export_admin_notices() {
+	if ( isset( $_GET['ml_exported'] ) && '1' === $_GET['ml_exported'] ) {
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><strong>ML Mailing Lists:</strong> La exportación se ha completado correctamente.</p>
+		</div>
+		<?php
+	}
+}
+add_action( 'admin_notices', 'ml_export_admin_notices' );
