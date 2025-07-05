@@ -30,8 +30,8 @@ function ml_subscription_form_shortcode( $atts ) {
 	$atts = shortcode_atts(
 		array(
 			'list_id'   => '',
-			'title'     => 'Suscríbete a nuestra lista',
-			'btn_text'  => 'Suscribirse',
+			'title'     => 'Subscríbete á nosa lista',
+			'btn_text'  => 'Subscribirse',
 			'css_class' => 'ml-subscription-form',
 		),
 		$atts
@@ -39,14 +39,14 @@ function ml_subscription_form_shortcode( $atts ) {
 
 	// Check if the list ID is provided.
 	if ( empty( $atts['list_id']) ) {
-		return '<p style="color: red;">Error: Debe especificar el ID de la lista.</p>';
+		return '<p style="color: red;">Erro: Debe especificar o ID da lista.</p>';
 	}
 
 	// Check if the taxonomy 'ml_lista' exists..
 	$term = get_term( $atts['list_id'], 'ml_lista' );
 
 	if ( is_wp_error( $term ) || ! $term ) {
-		return '<p style="color: red;">Error: La lista especificada no existe.</p>';
+		return '<p style="color: red;">Erro: A lista especificada non existe.</p>';
 	}
 
 	// Generate a unique ID for the form.
@@ -74,7 +74,7 @@ function ml_subscription_form_shortcode( $atts ) {
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
 
 			<div class="ml-field">
-				<label for="ml_name_<?php echo esc_attr( $atts['list_id'] ); ?>">Nombre *</label>
+				<label for="ml_name_<?php echo esc_attr( $atts['list_id'] ); ?>">Nome *</label>
 				<input type="text"
 					id="ml_name_<?php echo esc_attr( $atts['list_id'] ); ?>"
 					name="ml_name"
@@ -83,7 +83,7 @@ function ml_subscription_form_shortcode( $atts ) {
 			</div>
 
 			<div class="ml-field">
-				<label for="ml_surname_<?php echo esc_attr( $atts['list_id'] ); ?>">Apellidos *</label>
+				<label for="ml_surname_<?php echo esc_attr( $atts['list_id'] ); ?>">Apelidos *</label>
 				<input type="text"
 					id="ml_surname_<?php echo esc_attr( $atts['list_id'] ); ?>"
 					name="ml_surname"
@@ -92,7 +92,7 @@ function ml_subscription_form_shortcode( $atts ) {
 			</div>
 
 			<div class="ml-field">
-				<label for="ml_mail_<?php echo esc_attr( $atts['list_id'] ); ?>">Email *</label>
+				<label for="ml_mail_<?php echo esc_attr( $atts['list_id'] ); ?>">Correo *</label>
 				<input type="email"
 					id="ml_mail_<?php echo esc_attr( $atts['list_id'] ); ?>"
 					name="ml_mail"
@@ -110,7 +110,7 @@ function ml_subscription_form_shortcode( $atts ) {
 			</div>
 
 			<div class="ml-honeypot">
-				<label for="ml_honeypot_<?php echo esc_attr( $atts['list_id'] ); ?>" style="display:none;">Si usted es humano, deje este campo vacío.</label>
+				<label for="ml_honeypot_<?php echo esc_attr( $atts['list_id'] ); ?>" style="display:none;">Se es humano, deixe este campo baleiro.</label>
 				<input type="text" id="ml_honeypot_<?php echo esc_attr( $atts['list_id'] ); ?>" name="ml_honeypot" value="" style="display:none;">
 			</div>
 		</form>
@@ -270,7 +270,7 @@ function ml_get_subscription_form_css( $css_class ) {
 function ml_process_subscription_form() {
 	// Check if required POST variables exist
 	if ( ! isset( $_POST['ml_nonce'], $_POST['ml_list_id'], $_POST['ml_name'], $_POST['ml_surname'], $_POST['ml_mail'] ) ) {
-		return '<div class="ml-mensaje error">Datos del formulario incompletos.</div>';
+		return '<div class="ml-mensaje error">Datos do formulario incompletos.</div>';
 	}
 
 	// Verify nonce for security.
@@ -278,7 +278,7 @@ function ml_process_subscription_form() {
 	$nonce        = sanitize_text_field( wp_unslash( $_POST['ml_nonce'] ) );
 
 	if ( ! wp_verify_nonce( $nonce, 'ml_subscription_' . $list_id_post ) ) {
-		return '<div class="ml-mensaje error">Error de seguridad. Por favor, inténtelo de nuevo.</div>';
+		return '<div class="ml-mensaje error">Erro de seguridade. Por favor, inténteo de novo.</div>';
 	}
 
 	// Add rate limiting check (max 3 submissions per IP per hour).
@@ -287,7 +287,7 @@ function ml_process_subscription_form() {
 	$current_count  = get_transient( $rate_limit_key );
 
 	if ( $current_count && $current_count >= 3 ) {
-		return '<div class="ml-mensaje error">Demasiados intentos. Por favor, espere una hora antes de volver a intentarlo.</div>';
+		return '<div class="ml-mensaje error">Demasiados intentos. Por favor, agarde unha hora antes de volver intentalo.</div>';
 	}
 
 	// Sanitize input data.
@@ -298,16 +298,16 @@ function ml_process_subscription_form() {
 
 	// Validation checks.
 	if ( empty( $name ) || empty( $surname ) || empty( $email ) ) {
-		return '<div class="ml-mensaje error">Por favor, complete todos los campos obligatorios.</div>';
+		return '<div class="ml-mensaje error">Por favor, complete todos os campos obrigatorios.</div>';
 	}
 
 	if ( ! is_email( $email ) ) {
-		return '<div class="ml-mensaje error">Por favor, introduzca un email válido.</div>';
+		return '<div class="ml-mensaje error">Por favor, introduza un correo válido.</div>';
 	}
 
 	// Check if email already exists in the specific list.
 	if ( ml_subscription_exists( $email, $list_id ) ) {
-		return '<div class="ml-mensaje error">Este email ya está suscrito a esta lista.</div>';
+		return '<div class="ml-mensaje error">Este correo xa está subscrito a esta lista.</div>';
 	}
 
 	// Apply filters to allow customization.
@@ -332,7 +332,7 @@ function ml_process_subscription_form() {
 	$post_id = wp_insert_post( $post_data );
 
 	if ( is_wp_error( $post_id ) ) {
-		return '<div class="ml-mensaje error">Error al procesar la suscripción. Por favor, inténtelo de nuevo.</div>';
+		return '<div class="ml-mensaje error">Erro ao procesar a subscrición. Por favor, inténteo de novo.</div>';
 	}
 
 	// Assign taxonomy term to the post.
@@ -348,7 +348,7 @@ function ml_process_subscription_form() {
 	// Clear POST variables to prevent resubmission.
 	unset( $_POST['ml_name'], $_POST['ml_surname'], $_POST['ml_mail'] );
 
-	return '<div class="ml-mensaje success">¡Gracias! Su suscripción se ha procesado correctamente.</div>';
+	return '<div class="ml-mensaje success">¡Grazas! A súa subscrición procesouse correctamente.</div>';
 }
 
 /**
@@ -362,30 +362,30 @@ function ml_validate_subscription_data( $data ) {
 
 	// Basic validation.
 	if ( empty( $data['name'] ) ) {
-		$errors[] = 'El nombre es obligatorio.';
+		$errors[] = 'O nome é obrigatorio.';
 	} elseif ( strlen( $data['name'] ) > 100 ) {
-		$errors[] = 'El nombre no puede exceder 100 caracteres.';
+		$errors[] = 'O nome non pode superar os 100 caracteres.';
 	}
 
 	if ( empty( $data['surname'] ) ) {
-		$errors[] = 'Los apellidos son obligatorios.';
+		$errors[] = 'Os apelidos son obrigatorios.';
 	} elseif ( strlen( $data['surname'] ) > 100 ) {
-		$errors[] = 'Los apellidos no pueden exceder 100 caracteres.';
+		$errors[] = 'Os apelidos non poden superar os 100 caracteres.';
 	}
 
 	if ( empty( $data['email'] ) ) {
-		$errors[] = 'El email es obligatorio.';
+		$errors[] = 'O correo é obrigatorio.';
 	} elseif ( ! is_email( $data['email'] ) ) {
-		$errors[] = 'Por favor, introduzca un email válido.';
+		$errors[] = 'Por favor, introduza un correo válido.';
 	} elseif ( strlen( $data['email'] ) > 255 ) {
-		$errors[] = 'El email no puede exceder 255 caracteres.';
+		$errors[] = 'O correo non pode superar os 255 caracteres.';
 	}
 
 	// Check for suspicious patterns (basic spam detection).
 	$suspicious_patterns = array( 'http://', 'https://', 'www.', '.com', '.net', '.org' );
 	foreach ( $suspicious_patterns as $pattern ) {
 		if ( stripos( $data['name'], $pattern ) !== false || stripos( $data['surname'], $pattern ) !== false ) {
-			$errors[] = 'Los datos introducidos parecen contener contenido spam.';
+			$errors[] = 'Os datos introducidos parecen conter contido spam.';
 			break;
 		}
 	}
@@ -476,12 +476,12 @@ function ml_handle_export_requests() {
 
 	// Verify nonce for security.
 	if ( ! isset( $_GET['ml_export_nonce'] ) || ! wp_verify_nonce( $_GET['ml_export_nonce'], 'ml_export_emails' ) ) {
-		wp_die( 'Error de seguridad. Acceso denegado.' );
+		wp_die( 'Erro de seguridade. Acceso denegado.' );
 	}
 
 	// Check user permissions.
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( 'No tienes permisos para realizar esta acción.' );
+		wp_die( 'Non tes permisos para realizar esta acción.' );
 	}
 
 	$format  = sanitize_text_field( $_GET['ml_export'] );
@@ -491,7 +491,7 @@ function ml_handle_export_requests() {
 	$emails = ml_get_emails_for_export( $list_id );
 
 	if ( empty( $emails ) ) {
-		wp_die( 'No se encontraron emails para exportar.' );
+		wp_die( 'Non se atoparon correos para exportar.' );
 	}
 
 	// Generate filename.
@@ -594,7 +594,7 @@ function ml_output_csv( $emails ) {
 	fprintf( $output, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
 
 	// Add CSV headers.
-	fputcsv( $output, array( 'Nombre', 'Apellidos', 'Email', 'Fecha Suscripción', 'Listas' ), ';' );
+	fputcsv( $output, array( 'Nome', 'Apelido', 'Correo', 'Data Subscrición', 'Listas' ), ';' );
 
 	// Add data rows.
 	foreach ( $emails as $email_data ) {
@@ -622,13 +622,13 @@ function ml_output_csv( $emails ) {
 function ml_output_txt( $emails ) {
 	echo "LISTA DE CORREOS ELECTRÓNICOS\n";
 	echo "=============================\n";
-	echo 'Exportado el: ' . gmdate( 'd/m/Y H:i:s' ) . "\n";
-	echo 'Total de emails: ' . count( $emails ) . "\n\n";
+	echo 'Exportado o: ' . gmdate( 'd/m/Y H:i:s' ) . "\n";
+	echo 'Total de correos: ' . count( $emails ) . "\n\n";
 
 	foreach ( $emails as $email_data ) {
-		echo 'Nombre: ' . $email_data['name'] . ' ' . $email_data['surname'] . "\n";
-		echo 'Email: ' . $email_data['email'] . "\n";
-		echo 'Fecha: ' . $email_data['subscription_date'] . "\n";
+		echo 'Nome: ' . $email_data['name'] . ' ' . $email_data['surname'] . "\n";
+		echo 'Correo: ' . $email_data['email'] . "\n";
+		echo 'Data: ' . $email_data['subscription_date'] . "\n";
 		echo 'Listas: ' . $email_data['lists'] . "\n";
 		echo "------------------------\n";
 	}
@@ -764,9 +764,506 @@ function ml_export_admin_notices() {
 	if ( isset( $_GET['ml_exported'] ) && '1' === $_GET['ml_exported'] ) {
 		?>
 		<div class="notice notice-success is-dismissible">
-			<p><strong>ML Mailing Lists:</strong> La exportación se ha completado correctamente.</p>
+			<p><strong>ML Mailing Lists:</strong> A exportación completouse correctamente.</p>
 		</div>
 		<?php
 	}
 }
 add_action( 'admin_notices', 'ml_export_admin_notices' );
+
+/**
+ * Add email sending functionality to admin.
+ */
+add_action( 'admin_menu', 'ml_add_email_sender_page' );
+add_action( 'admin_init', 'ml_handle_email_sending' );
+add_action( 'admin_enqueue_scripts', 'ml_enqueue_admin_scripts' );
+
+/**
+ * Add email sender submenu page.
+ */
+function ml_add_email_sender_page() {
+	add_submenu_page(
+		'edit.php?post_type=ml_mailing_lists',
+		'Enviar Correo',
+		'Enviar Correo',
+		'manage_options',
+		'ml-send-email',
+		'ml_email_sender_page_callback'
+	);
+}
+
+/**
+ * Callback for the email sender page.
+ */
+function ml_email_sender_page_callback() {
+	// Check user permissions.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Non tes permisos para acceder a esta páxina.' );
+	}
+
+	// Get all lists for the dropdown.
+	$lists = get_terms(
+		array(
+			'taxonomy'   => 'ml_lista',
+			'hide_empty' => false,
+		)
+	);
+
+	?>
+	<div class="wrap">
+		<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+
+		<?php
+		// Show admin notices.
+		if ( isset( $_GET['message'] ) ) {
+			$message_type = sanitize_text_field( $_GET['message'] );
+			if ( 'sent' === $message_type ) {
+				echo '<div class="notice notice-success is-dismissible"><p><strong>¡Éxito!</strong> O correo enviouse correctamente a todos os subscritores.</p></div>';
+			} elseif ( 'error' === $message_type ) {
+				echo '<div class="notice notice-error is-dismissible"><p><strong>Erro:</strong> Ocorreu un problema ao enviar o correo.</p></div>';
+			} elseif ( 'no-subscribers' === $message_type ) {
+				echo '<div class="notice notice-warning is-dismissible"><p><strong>Aviso:</strong> Non se atoparon subscritores na lista seleccionada.</p></div>';
+			}
+		}
+		?>
+
+		<form method="post" action="" id="ml-email-form">
+			<?php wp_nonce_field( 'ml_send_email', 'ml_email_nonce' ); ?>
+
+			<table class="form-table">
+				<tr>
+					<th scope="row">
+						<label for="ml_email_list">Lista de destinatarios <span class="description">(obrigatorio)</span></label>
+					</th>
+					<td>
+						<select name="ml_email_list" id="ml_email_list" class="regular-text" required>
+							<option value="">-- Selecciona unha lista --</option>
+							<?php if ( ! empty( $lists ) && ! is_wp_error( $lists ) ) : ?>
+								<?php foreach ( $lists as $list ) : ?>								<option value="<?php echo esc_attr( $list->term_id ); ?>">
+									<?php echo esc_html( $list->name ); ?>
+									(<?php echo esc_html( $list->count ); ?> subscritores)
+								</option>
+								<?php endforeach; ?>
+							<?php else : ?>
+								<option value="" disabled>Non hai listas dispoñibles</option>
+							<?php endif; ?>
+						</select>
+						<p class="description">Selecciona a lista á que queres enviar o correo.</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="ml_email_from_name">Nome do remitente</label>
+					</th>
+					<td>
+						<input type="text"
+							name="ml_email_from_name"
+							id="ml_email_from_name"
+							class="regular-text"
+							value="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"
+							placeholder="O teu nome ou empresa">
+						<p class="description">Nome que aparecerá como remitente do correo.</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="ml_email_from_email">Correo do remitente</label>
+					</th>
+					<td>
+						<input type="email"
+							name="ml_email_from_email"
+							id="ml_email_from_email"
+							class="regular-text"
+							value="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>"
+							placeholder="o.teu@correo.com"
+							required>
+						<p class="description">Enderezo de correo que aparecerá como remitente.</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="ml_email_subject">Asunto do correo <span class="description">(obrigatorio)</span></label>
+					</th>
+					<td>
+						<input type="text"
+							name="ml_email_subject"
+							id="ml_email_subject"
+							class="widefat"
+							placeholder="Escribe o asunto do correo..."
+							required>
+						<p class="description">O asunto que verán os destinatarios.</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="ml_email_content">Contido do correo <span class="description">(obrigatorio)</span></label>
+					</th>
+					<td>
+						<?php
+						wp_editor(
+							'',
+							'ml_email_content',
+							array(
+								'textarea_name' => 'ml_email_content',
+								'textarea_rows' => 15,
+								'teeny'         => false,
+								'media_buttons' => true,
+								'tinymce'       => array(
+									'toolbar1' => 'bold,italic,underline,strikethrough,bullist,numlist,blockquote,hr,alignleft,aligncenter,alignright,link,unlink,wp_more,spellchecker,fullscreen,wp_adv',
+									'toolbar2' => 'formatselect,underline,alignjustify,forecolor,pastetext,removeformat,charmap,outdent,indent,undo,redo,wp_help',
+								),
+								'quicktags'     => true,
+							)
+						);
+						?>
+						<p class="description">
+							Podes usar HTML e texto enriquecido.
+							<strong>Variables dispoñibles:</strong>
+							<code>{{nome}}</code> - Nome do subscritor,
+							<code>{{apelido}}</code> - Apelido do subscritor,
+							<code>{{correo}}</code> - Correo do subscritor
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="ml_email_preview">Vista previa</label>
+					</th>
+					<td>
+						<label for="ml_email_preview_check">
+							<input type="checkbox" id="ml_email_preview_check" name="ml_email_preview" value="1">
+							Enviar correo de proba antes do envío masivo
+						</label>
+						<p class="description">Enviarase unha copia ao teu correo antes do envío masivo.</p>
+					</td>
+				</tr>
+			</table>
+
+			<div class="ml-email-actions">
+				<p class="submit">
+					<input type="submit"
+						name="ml_send_email"
+						id="ml_send_email_btn"
+						class="button button-primary button-large"
+						value="📧 Enviar Correo">
+					<span class="spinner" id="ml_email_spinner"></span>
+				</p>
+
+				<div class="ml-email-confirmation" id="ml_email_confirmation" style="display: none;">
+					<div class="notice notice-warning">
+						<p>
+							<strong>⚠️ Confirmación necesaria</strong><br>
+							Estás a punto de enviar un correo a <span id="ml_subscriber_count">0</span> subscritores da lista "<span id="ml_list_name"></span>".
+							<br><br>
+							<button type="button" class="button button-secondary" onclick="mlCancelEmail()">Cancelar</button>
+							<button type="button" class="button button-primary" onclick="mlConfirmEmail()">Confirmar Envío</button>
+						</p>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	<style>
+	.ml-email-actions {
+		margin-top: 20px;
+		padding-top: 20px;
+		border-top: 1px solid #ddd;
+	}
+
+	.ml-email-confirmation {
+		max-width: 600px;
+		margin-top: 15px;
+	}
+
+	.ml-email-confirmation .notice {
+		padding: 15px;
+	}
+
+	#ml_email_spinner.is-active {
+		float: none;
+		margin-left: 10px;
+		visibility: visible;
+	}
+
+	.form-table th {
+		width: 200px;
+	}
+
+	.description {
+		color: #666;
+		font-style: italic;
+	}
+
+	.widefat {
+		width: 100%;
+		max-width: 600px;
+	}
+	</style>
+
+	<script>
+	let mlEmailConfirmationPending = false;
+
+	document.getElementById('ml-email-form').addEventListener('submit', function(e) {
+		if (!mlEmailConfirmationPending) {
+			e.preventDefault();
+			mlShowConfirmation();
+		}
+	});
+
+	function mlShowConfirmation() {
+		const listSelect = document.getElementById('ml_email_list');
+		const selectedOption = listSelect.options[listSelect.selectedIndex];
+
+		if (!selectedOption.value) {
+			alert('Por favor, selecciona unha lista de destinatarios.');
+			return;
+		}
+
+		const listName = selectedOption.text.split(' (')[0];
+		const subscriberCount = selectedOption.text.match(/\((\d+) subscritores\)/);
+
+		document.getElementById('ml_list_name').textContent = listName;
+		document.getElementById('ml_subscriber_count').textContent = subscriberCount ? subscriberCount[1] : '0';
+		document.getElementById('ml_email_confirmation').style.display = 'block';
+		document.getElementById('ml_send_email_btn').style.display = 'none';
+	}
+
+	function mlCancelEmail() {
+		document.getElementById('ml_email_confirmation').style.display = 'none';
+		document.getElementById('ml_send_email_btn').style.display = 'inline-block';
+		mlEmailConfirmationPending = false;
+	}
+
+	function mlConfirmEmail() {
+		mlEmailConfirmationPending = true;
+		document.getElementById('ml_email_spinner').classList.add('is-active');
+		document.getElementById('ml-email-form').submit();
+	}
+	</script>
+	<?php
+}
+
+/**
+ * Handle email sending form submission.
+ */
+function ml_handle_email_sending() {
+	// Check if this is an email sending request.
+	if ( ! isset( $_POST['ml_send_email'] ) || ! isset( $_POST['ml_email_nonce'] ) ) {
+		return;
+	}
+
+	// Verify nonce.
+	if ( ! wp_verify_nonce( $_POST['ml_email_nonce'], 'ml_send_email' ) ) {
+		wp_die( 'Erro de seguridade. Por favor, inténtao de novo.' );
+	}
+
+	// Check user permissions.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Non tes permisos para realizar esta acción.' );
+	}
+
+	// Sanitize and validate form data.
+	$list_id     = isset( $_POST['ml_email_list'] ) ? intval( $_POST['ml_email_list'] ) : 0;
+	$from_name   = isset( $_POST['ml_email_from_name'] ) ? sanitize_text_field( wp_unslash( $_POST['ml_email_from_name'] ) ) : get_bloginfo( 'name' );
+	$from_email  = isset( $_POST['ml_email_from_email'] ) ? sanitize_email( wp_unslash( $_POST['ml_email_from_email'] ) ) : get_option( 'admin_email' );
+	$subject     = isset( $_POST['ml_email_subject'] ) ? sanitize_text_field( wp_unslash( $_POST['ml_email_subject'] ) ) : '';
+	$content     = isset( $_POST['ml_email_content'] ) ? wp_kses_post( wp_unslash( $_POST['ml_email_content'] ) ) : '';
+	$send_preview = isset( $_POST['ml_email_preview'] ) && '1' === $_POST['ml_email_preview'];
+
+	// Validation.
+	if ( empty( $list_id ) || empty( $subject ) || empty( $content ) ) {
+		wp_safe_redirect( add_query_arg( 'message', 'error', admin_url( 'edit.php?post_type=ml_mailing_lists&page=ml-send-email' ) ) );
+		exit;
+	}
+
+	// Get subscribers from the selected list.
+	$subscribers = ml_get_list_subscribers( $list_id );
+
+	if ( empty( $subscribers ) ) {
+		wp_safe_redirect( add_query_arg( 'message', 'no-subscribers', admin_url( 'edit.php?post_type=ml_mailing_lists&page=ml-send-email' ) ) );
+		exit;
+	}
+
+	// Send preview email if requested.
+	if ( $send_preview ) {
+		$preview_result = ml_send_preview_email( $from_name, $from_email, $subject, $content );
+		if ( ! $preview_result ) {
+			wp_safe_redirect( add_query_arg( 'message', 'error', admin_url( 'edit.php?post_type=ml_mailing_lists&page=ml-send-email' ) ) );
+			exit;
+		}
+	}
+
+	// Send emails to all subscribers.
+	$sent_count = ml_send_bulk_emails( $subscribers, $from_name, $from_email, $subject, $content );
+
+	// Log the email sending activity.
+	ml_log_email_activity( $list_id, $subject, count( $subscribers ), $sent_count );
+
+	// Redirect with success message.
+	wp_safe_redirect( add_query_arg( 'message', 'sent', admin_url( 'edit.php?post_type=ml_mailing_lists&page=ml-send-email' ) ) );
+	exit;
+}
+
+/**
+ * Get subscribers from a specific list.
+ *
+ * @param int $list_id The list ID.
+ * @return array Array of subscriber data.
+ */
+function ml_get_list_subscribers( $list_id ) {
+	$posts = get_posts(
+		array(
+			'post_type'      => 'ml_mailing_lists',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'tax_query'      => array(
+				array(
+					'taxonomy' => 'ml_lista',
+					'field'    => 'term_id',
+					'terms'    => $list_id,
+				),
+			),
+			'meta_query'     => array(
+				array(
+					'key'     => 'ml_email',
+					'compare' => 'EXISTS',
+				),
+			),
+		)
+	);
+
+	$subscribers = array();
+	foreach ( $posts as $post ) {
+		$email = get_post_meta( $post->ID, 'ml_email', true );
+		if ( is_email( $email ) ) {
+			$subscribers[] = array(
+				'email'   => $email,
+				'name'    => get_post_meta( $post->ID, 'ml_name', true ),
+				'surname' => get_post_meta( $post->ID, 'ml_surname', true ),
+			);
+		}
+	}
+
+	return $subscribers;
+}
+
+/**
+ * Send a preview email to the admin.
+ *
+ * @param string $from_name  From name.
+ * @param string $from_email From email.
+ * @param string $subject    Email subject.
+ * @param string $content    Email content.
+ * @return bool Success status.
+ */
+function ml_send_preview_email( $from_name, $from_email, $subject, $content ) {
+	$admin_email = get_option( 'admin_email' );
+	$preview_subject = '[VISTA PREVIA] ' . $subject;
+
+	// Replace variables with sample data.
+	$preview_content = str_replace(
+		array( '{{nome}}', '{{apelido}}', '{{correo}}' ),
+		array( 'Xoán', 'Pérez', 'xoan.perez@example.com' ),
+		$content
+	);
+
+	$headers = array(
+		'Content-Type: text/html; charset=UTF-8',
+		'From: ' . $from_name . ' <' . $from_email . '>',
+	);
+
+	return wp_mail( $admin_email, $preview_subject, $preview_content, $headers );
+}
+
+/**
+ * Send bulk emails to subscribers.
+ *
+ * @param array  $subscribers Array of subscriber data.
+ * @param string $from_name   From name.
+ * @param string $from_email  From email.
+ * @param string $subject     Email subject.
+ * @param string $content     Email content.
+ * @return int Number of emails sent successfully.
+ */
+function ml_send_bulk_emails( $subscribers, $from_name, $from_email, $subject, $content ) {
+	$sent_count = 0;
+	$headers    = array(
+		'Content-Type: text/html; charset=UTF-8',
+		'From: ' . $from_name . ' <' . $from_email . '>',
+	);
+
+	foreach ( $subscribers as $subscriber ) {
+		// Replace variables in content.
+		$personalized_content = str_replace(
+			array( '{{nome}}', '{{apelido}}', '{{correo}}' ),
+			array( $subscriber['name'], $subscriber['surname'], $subscriber['email'] ),
+			$content
+		);
+
+		// Send email.
+		if ( wp_mail( $subscriber['email'], $subject, $personalized_content, $headers ) ) {
+			++$sent_count;
+		}
+
+		// Small delay to prevent overwhelming the server.
+		usleep( 100000 ); // 0.1 seconds
+	}
+
+	return $sent_count;
+}
+
+/**
+ * Log email sending activity.
+ *
+ * @param int    $list_id      List ID.
+ * @param string $subject      Email subject.
+ * @param int    $total_count  Total subscribers.
+ * @param int    $sent_count   Successfully sent emails.
+ */
+function ml_log_email_activity( $list_id, $subject, $total_count, $sent_count ) {
+	$log_entry = array(
+		'date'    => current_time( 'mysql' ),
+		'list_id' => $list_id,
+		'subject' => $subject,
+		'total'   => $total_count,
+		'sent'    => $sent_count,
+		'user_id' => get_current_user_id(),
+	);
+
+	$existing_logs = get_option( 'ml_email_logs', array() );
+	$existing_logs[] = $log_entry;
+
+	// Keep only last 100 entries.
+	if ( count( $existing_logs ) > 100 ) {
+		$existing_logs = array_slice( $existing_logs, -100 );
+	}
+
+	update_option( 'ml_email_logs', $existing_logs );
+}
+
+/**
+ * Enqueue admin scripts and styles.
+ *
+ * @param string $hook_suffix The current admin page.
+ */
+function ml_enqueue_admin_scripts( $hook_suffix ) {
+	// Only enqueue on our email sender page.
+	if ( 'ml_mailing_lists_page_ml-send-email' !== $hook_suffix ) {
+		return;
+	}
+
+	wp_enqueue_media();
+
+	// Ensure TinyMCE is loaded.
+	if ( ! class_exists( '_WP_Editors', false ) ) {
+		require_once ABSPATH . WPINC . '/class-wp-editor.php';
+	}
+
+	_WP_Editors::enqueue_scripts();
+}
