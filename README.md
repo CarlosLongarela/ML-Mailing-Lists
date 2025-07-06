@@ -136,7 +136,7 @@ O plugin inclúe CSS por defecto, pero podes personalizalo usando as variables C
 
 ### Hooks e filtros dispoñibles
 
-**Filtros:**
+**Filtros de personalización:**
 ```php
 // Personalizar datos antes de gardar a subscrición
 add_filter( 'ml_subscription_name', 'mi_filtro_nome', 10, 2 );
@@ -144,10 +144,57 @@ add_filter( 'ml_subscription_surname', 'mi_filtro_apelido', 10, 2 );
 add_filter( 'ml_subscription_email', 'mi_filtro_email', 10, 2 );
 ```
 
-**Accións:**
+**Accións de eventos:**
 ```php
 // Executar código despois de crear unha subscrición
 add_action( 'ml_subscription_created', 'mi_funcion_post_subscripcion', 10, 3 );
+
+// Activación/desactivación do plugin
+add_action( 'ml_plugin_activated', 'mi_funcion_activacion' );
+add_action( 'ml_plugin_deactivated', 'mi_funcion_desactivacion' );
+```
+
+**Hooks de inicialización:**
+```php
+// Despois da inicialización das clases
+add_action( 'ml_core_initialized', 'mi_funcion_inicializacion' );
+
+// Antes de procesar un formulario
+add_action( 'ml_before_form_processing', 'mi_funcion_pre_formulario' );
+```
+
+### Exemplos de extensión
+
+**Engadir validación personalizada:**
+```php
+add_filter( 'ml_subscription_email', function( $email, $list_id ) {
+    // Bloquear dominios específicos
+    $blocked_domains = ['example.com', 'spam.com'];
+    $domain = substr(strrchr($email, '@'), 1);
+    
+    if (in_array($domain, $blocked_domains)) {
+        return false; // Esto activará unha validación de erro
+    }
+    
+    return $email;
+}, 10, 2 );
+```
+
+**Logging personalizado:**
+```php
+add_action( 'ml_subscription_created', function( $post_id, $email, $list_id ) {
+    // Enviar notificación por Slack, Discord, etc.
+    $list_name = get_term( $list_id, 'ml_lista' )->name;
+    
+    error_log( "Nova subscrición en '{$list_name}': {$email}" );
+    
+    // Ou enviar webhook
+    wp_remote_post( 'https://hooks.slack.com/services/...', [
+        'body' => json_encode([
+            'text' => "Nova subscrición: {$email} en {$list_name}"
+        ])
+    ]);
+}, 10, 3 );
 ```
 
 ## 🛡️ Características de Seguridade
@@ -168,13 +215,133 @@ add_action( 'ml_subscription_created', 'mi_funcion_post_subscripcion', 10, 3 );
 
 ## 📁 Estrutura de Arquivos
 
+### Estrutura modular do plugin
+
 ```
 ml-mailing-lists/
-├── ml-mailing-lists.php   # Arquivo principal do plugin
-└── README.md              # Este arquivo
+├── ml-mailing-lists.php           # Arquivo principal - Cargador do plugin
+├── README.md                      # Documentación completa
+└── includes/                      # Classes modulares
+    ├── class-ml-core.php          # Clase principal - Xestor de dependencias
+    ├── class-ml-shortcode.php     # Xestión de shortcodes de subscrición
+    ├── class-ml-security.php      # Sistema de seguridade e validación
+    ├── class-ml-admin.php         # Interface de administración
+    ├── class-ml-email-sender.php  # Xestión de envío de emails
+    ├── class-ml-export.php        # Sistema de exportación de datos
+    └── functions.php              # Funcións auxiliares globais
 ```
 
-## 🌐 Idiomas
+### Descrición das clases
+
+#### 🔧 `ML_Core` (class-ml-core.php)
+- **Función principal**: Cargador e inicializador do plugin
+- **Patrón**: Singleton
+- **Responsabilidades**:
+  - Cargar todas as dependencias
+  - Inicializar as clases modulares
+  - Xestionar hooks de activación/desactivación
+  - Cargar traduccións
+
+#### 📝 `ML_Shortcode` (class-ml-shortcode.php)
+- **Función principal**: Xestión de formularios de subscrición
+- **Patrón**: Singleton
+- **Responsabilidades**:
+  - Rexistrar e procesar shortcodes
+  - Xerar HTML dos formularios
+  - Procesar envíos de subscrición
+  - Aplicar estilos CSS
+
+#### 🛡️ `ML_Security` (class-ml-security.php)
+- **Función principal**: Sistema de seguridade integral
+- **Patrón**: Singleton con métodos estáticos
+- **Responsabilidades**:
+  - Xestión de nonces de seguridade
+  - Rate limiting (control de frecuencia)
+  - Detección de honeypot anti-spam
+  - Validación e sanitización de datos
+  - Obtención segura de IP de usuario
+
+#### ⚙️ `ML_Admin` (class-ml-admin.php)
+- **Función principal**: Interface de administración
+- **Patrón**: Singleton
+- **Responsabilidades**:
+  - Páxinas de envío masivo
+  - Interface de exportación
+  - Xestión de menús de admin
+  - Procesamento de formularios de admin
+
+#### 📧 `ML_Email_Sender` (class-ml-email-sender.php)
+- **Función principal**: Sistema de envío de emails
+- **Patrón**: Singleton
+- **Responsabilidades**:
+  - Envío de emails individuais
+  - Envío masivo con personalización
+  - Xestión de variables de plantilla
+  - Estatísticas de envío
+
+#### 📊 `ML_Export` (class-ml-export.php)
+- **Función principal**: Exportación de datos
+- **Patrón**: Singleton
+- **Responsabilidades**:
+  - Exportación en formato CSV
+  - Exportación en formato TXT
+  - Validación de parámetros
+  - Estatísticas de exportación
+
+#### 🔧 Funcións auxiliares (functions.php)
+- **Función principal**: Utilidades globais
+- **Funcións principais**:
+  - `ml_subscription_exists()`: Verificar subscricións existentes
+  - `ml_get_subscriber_by_email()`: Obter datos por email
+  - `ml_get_list_subscribers()`: Obter subscriptores de lista
+  - `ml_get_list_stats()`: Estatísticas das listas
+  - `ml_log_activity()`: Sistema de logging
+  - `ml_format_date()`: Formateo de datas
+  - `ml_user_can_manage_lists()`: Verificación de permisos
+
+## �️ Arquitectura Técnica
+
+### Patrón de deseño implementado
+
+O plugin segue unha **arquitectura modular basada no patrón Singleton** que garante:
+
+- **Unha soa instancia** de cada clase principal
+- **Carga eficiente** de recursos
+- **Separación clara** de responsabilidades
+- **Fácil mantemento** e extensibilidade
+
+### Fluxo de inicialización
+
+```
+WordPress carga → ml-mailing-lists.php → ML_Core::get_instance()
+                                           ↓
+                                      Carga dependencias
+                                           ↓
+                    ┌─────────────────────────────────────────┐
+                    │          ML_Core::init_plugin()         │
+                    └─────────────────────────────────────────┘
+                                           ↓
+    ┌─────────────────┬─────────────────┬─────────────────┬─────────────────┐
+    │   ML_Security   │  ML_Shortcode   │  ML_Email_Sender │    ML_Export    │
+    │ ::get_instance()│ ::get_instance()│ ::get_instance() │ ::get_instance()│
+    └─────────────────┴─────────────────┴─────────────────┴─────────────────┘
+                                           ↓
+                              ┌─────────────────────────┐
+                              │       ML_Admin         │
+                              │   ::get_instance()     │
+                              │   (só en admin)        │
+                              └─────────────────────────┘
+```
+
+### Melloras de rendemento
+
+- **Lazy loading**: As clases cárganse só cando se necesitan
+- **Singleton pattern**: Evita instanciación múltiple
+- **Conditional loading**: ML_Admin só se carga no backend
+- **Optimización de queries**: Uso eficiente de meta_query e tax_query
+- **CSS estático**: Evita duplicación de estilos
+
+## �🌐 Idiomas
 
 O plugin está completamente traducido ao **galego** tanto no frontend como no backend, incluíndo:
 
@@ -254,7 +421,18 @@ $logs = get_option( 'ml_email_logs', array() );
 
 ## 📝 Changelog
 
-### Versión 1.0.1
+### Versión 1.0.1 - Refactorización Modular
+- ✅ **Arquitectura modular completa** con clases separadas
+- ✅ **Patrón Singleton** implementado en todas as clases principais
+- ✅ **Comentarios de código en inglés** para desenvolvedores
+- ✅ **Separación de responsabilidades** clara e modular
+- ✅ **Classe ML_Core** como cargador principal do plugin
+- ✅ **Classe ML_Security** para toda a xestión de seguridade
+- ✅ **Classe ML_Shortcode** para formularios de subscrición
+- ✅ **Classe ML_Admin** para interface de administración
+- ✅ **Classe ML_Email_Sender** para xestión de emails
+- ✅ **Classe ML_Export** para exportación de datos
+- ✅ **Funcións auxiliares** organizadas en functions.php
 - ✅ Funcionalidade de envío masivo engadida
 - ✅ Sistema de exportación implementado
 - ✅ Tradución completa ao galego
@@ -263,6 +441,7 @@ $logs = get_option( 'ml_email_logs', array() );
 - ✅ Sistema anti-spam con honeypot e rate limiting
 - ✅ Vista previa de emails antes do envío
 - ✅ Logging de actividade de envíos
+- ✅ **Documentación actualizada** con nova estrutura
 
 ### Versión 1.0.0
 - ✅ Funcionalidade básica de subscrición
@@ -270,6 +449,105 @@ $logs = get_option( 'ml_email_logs', array() );
 - ✅ Integración con Pods
 
 ## 👨‍💻 Desenvolvemento
+
+## 👨‍💻 Desenvolvemento
+
+### Arquitectura modular
+
+O plugin está deseñado cunha **arquitectura modular moderna** que facilita:
+
+- **Mantemento**: Cada funcionalidade en súa propia clase
+- **Testing**: Classes independentes fáciles de probar
+- **Extensibilidade**: Novos módulos pódense engadir facilmente
+- **Legibilidade**: Código organizado e ben documentado
+
+### Estándares implementados
+
+- ✅ **Patrón Singleton** para clases principais
+- ✅ **Hooks e filtros nativos** de WordPress
+- ✅ **Sanitización e validación** estricta
+- ✅ **Nonces de seguridade** en todos os formularios
+- ✅ **Estándares de codificación** de WordPress
+- ✅ **Comentarios en inglés** para desenvolvedores
+- ✅ **Separación de responsabilidades** clara
+- ✅ **Prevención de execución directa** con ABSPATH
+- ✅ **Compatibilidade con PHP 7.4+**
+
+### Clases principais e os seus métodos
+
+#### ML_Core
+```php
+// Inicialización do plugin
+ML_Core::get_instance();
+
+// Métodos principais
+->init_plugin()          // Inicializa todos os módulos
+->load_dependencies()    // Carga arquivos de clases
+->load_textdomain()      // Carga traduccións
+```
+
+#### ML_Security
+```php
+// Métodos de seguridade (estáticos)
+ML_Security::verify_nonce($nonce, $action);
+ML_Security::create_nonce($action);
+ML_Security::check_rate_limit($ip);
+ML_Security::validate_subscription_data($data);
+ML_Security::get_user_ip();
+```
+
+#### ML_Shortcode
+```php
+// Xestión de shortcodes
+->subscription_form_shortcode($atts);
+->process_subscription_form();
+->get_subscription_form_css($css_class);
+```
+
+### Estrutura de datos
+
+#### Custom Post Type: `ml_suscriptor`
+```php
+// Metadatos almacenados
+'nome'               => string    // Nome do subscritor
+'apelido'            => string    // Apelido do subscritor  
+'correo'             => string    // Email do subscritor
+'data_subscripcion'  => datetime  // Data de subscrición
+'ml_ip_address'      => string    // IP de rexistro
+```
+
+#### Taxonomía: `ml_lista`
+```php
+// Termos que representan as listas de correo
+'name'        => string  // Nome da lista
+'description' => string  // Descrición da lista
+'count'       => int     // Número de subscriptores
+```
+
+### Funcións auxiliares globais
+
+```php
+// Verificar subscrición existente
+ml_subscription_exists($email, $list_id);
+
+// Obter datos de subscritor
+ml_get_subscriber_by_email($email);
+
+// Obter subscriptores dunha lista
+ml_get_list_subscribers($list_id);
+
+// Estatísticas
+ml_get_list_stats($list_id);
+
+// Logging
+ml_log_activity($action, $details, $user_id);
+
+// Validación
+ml_is_valid_email($email);
+
+// Permisos
+ml_user_can_manage_lists($user_id);
+```
 
 ### Para desenvolvedores
 
@@ -280,6 +558,7 @@ O plugin segue as mellores prácticas de WordPress:
 - Nonces para seguridade
 - Estándares de codificación de WordPress
 - Arquitectura modular e extensible
+- Documentación completa en inglés
 
 ### Contribucións
 
