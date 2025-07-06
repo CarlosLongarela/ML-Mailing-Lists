@@ -170,9 +170,8 @@ add_action( 'ml_subscription_created', 'mi_funcion_post_subscripcion', 10, 3 );
 
 ```
 ml-mailing-lists/
-├── ml-mailing-lists.php     # Arquivo principal do plugin
-├── README.md                # Este arquivo
-└── SECURITY_IMPROVEMENTS.md # Documentación de melloras de seguridade
+├── ml-mailing-lists.php   # Arquivo principal do plugin
+└── README.md              # Este arquivo
 ```
 
 ## 🌐 Idiomas
@@ -195,7 +194,7 @@ O plugin está completamente traducido ao **galego** tanto no frontend como no b
 
 ### 1. Crear listas de correo
 
-1. Ve a **ML Mailing Lists > ML Lista**
+1. Ve a **Listas de correo > Listas**
 2. Engade unha nova lista
 3. Anota o ID da lista para usar no shortcode
 
