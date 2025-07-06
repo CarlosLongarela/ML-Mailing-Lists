@@ -32,7 +32,7 @@ define( 'ML_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
  */
 function ml_init_plugin() {
 	// Load the core class that handles all plugin initialization.
-	require_once ML_PLUGIN_PATH . 'includes/class-ml-core.php';
+	require_once ML_PLUGIN_PATH . 'includes/class-core.php';
 
 	// Initialize the plugin using the singleton pattern with namespace.
 	\ML_Mailing_Lists\Core::get_instance();

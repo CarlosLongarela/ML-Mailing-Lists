@@ -69,11 +69,11 @@ class Core {
 		require_once ML_PLUGIN_PATH . 'includes/functions.php';
 
 		// Load main classes.
-		require_once ML_PLUGIN_PATH . 'includes/class-ml-security.php';
-		require_once ML_PLUGIN_PATH . 'includes/class-ml-shortcode.php';
-		require_once ML_PLUGIN_PATH . 'includes/class-ml-email-sender.php';
-		require_once ML_PLUGIN_PATH . 'includes/class-ml-export.php';
-		require_once ML_PLUGIN_PATH . 'includes/class-ml-admin.php';
+		require_once ML_PLUGIN_PATH . 'includes/class-security.php';
+		require_once ML_PLUGIN_PATH . 'includes/class-shortcode.php';
+		require_once ML_PLUGIN_PATH . 'includes/class-email-sender.php';
+		require_once ML_PLUGIN_PATH . 'includes/class-export.php';
+		require_once ML_PLUGIN_PATH . 'includes/class-admin.php';
 	}
 
 	/**

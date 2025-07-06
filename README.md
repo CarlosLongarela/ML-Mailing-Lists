@@ -222,12 +222,12 @@ ml-mailing-lists/
 ├── ml-mailing-lists.php           # Arquivo principal - Cargador do plugin
 ├── README.md                      # Documentación completa
 └── includes/                      # Classes modulares con namespace ML_Mailing_Lists
-    ├── class-ml-core.php          # Core - Xestor principal de dependencias
-    ├── class-ml-shortcode.php     # Shortcode - Xestión de formularios
-    ├── class-ml-security.php      # Security - Sistema de seguridade
-    ├── class-ml-admin.php         # Admin - Interface de administración
-    ├── class-ml-email-sender.php  # Email_Sender - Xestión de envío
-    ├── class-ml-export.php        # Export - Sistema de exportación
+    ├── class-core.php          # Core - Xestor principal de dependencias
+    ├── class-shortcode.php     # Shortcode - Xestión de formularios
+    ├── class-security.php      # Security - Sistema de seguridade
+    ├── class-admin.php         # Admin - Interface de administración
+    ├── class-email-sender.php  # Email_Sender - Xestión de envío
+    ├── class-export.php        # Export - Sistema de exportación
     └── functions.php              # Funcións auxiliares con namespace
 ```
 
@@ -251,7 +251,7 @@ namespace ML_Mailing_Lists;
 
 ### Descrición das clases
 
-#### 🔧 `ML_Mailing_Lists\Core` (class-ml-core.php)
+#### 🔧 `ML_Mailing_Lists\Core` (class-core.php)
 - **Función principal**: Cargador e inicializador do plugin
 - **Patrón**: Singleton con namespace
 - **Responsabilidades**:
@@ -260,7 +260,7 @@ namespace ML_Mailing_Lists;
   - Xestionar hooks de activación/desactivación
   - Cargar traduccións
 
-#### 📝 `ML_Mailing_Lists\Shortcode` (class-ml-shortcode.php)
+#### 📝 `ML_Mailing_Lists\Shortcode` (class-shortcode.php)
 - **Función principal**: Xestión de formularios de subscrición
 - **Patrón**: Singleton con namespace
 - **Responsabilidades**:
@@ -269,7 +269,7 @@ namespace ML_Mailing_Lists;
   - Procesar envíos de subscrición
   - Aplicar estilos CSS
 
-#### 🛡️ `ML_Security` (class-ml-security.php)
+#### 🛡️ `ML_Security` (class-security.php)
 - **Función principal**: Sistema de seguridade integral
 - **Patrón**: Singleton con métodos estáticos
 - **Responsabilidades**:
@@ -279,7 +279,7 @@ namespace ML_Mailing_Lists;
   - Validación e sanitización de datos
   - Obtención segura de IP de usuario
 
-#### ⚙️ `ML_Admin` (class-ml-admin.php)
+#### ⚙️ `ML_Admin` (class-admin.php)
 - **Función principal**: Interface de administración
 - **Patrón**: Singleton
 - **Responsabilidades**:
@@ -288,7 +288,7 @@ namespace ML_Mailing_Lists;
   - Xestión de menús de admin
   - Procesamento de formularios de admin
 
-#### 📧 `ML_Email_Sender` (class-ml-email-sender.php)
+#### 📧 `ML_Email_Sender` (class-email-sender.php)
 - **Función principal**: Sistema de envío de emails
 - **Patrón**: Singleton
 - **Responsabilidades**:
@@ -297,7 +297,7 @@ namespace ML_Mailing_Lists;
   - Xestión de variables de plantilla
   - Estatísticas de envío
 
-#### 📊 `ML_Export` (class-ml-export.php)
+#### 📊 `ML_Export` (class-export.php)
 - **Función principal**: Exportación de datos
 - **Patrón**: Singleton
 - **Responsabilidades**:
