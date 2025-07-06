@@ -7,21 +7,23 @@
  * @since 1.0.1
  */
 
+namespace ML_Mailing_Lists;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
 /**
- * Class ML_Export
+ * Export class
  *
  * Handles data export functionality.
  */
-class ML_Export {
+class Export {
 
 	/**
 	 * Unique instance of the class
 	 *
-	 * @var ML_Export
+	 * @var Export
 	 */
 	private static $instance = null;
 
@@ -35,7 +37,7 @@ class ML_Export {
 	/**
 	 * Get unique instance of the class
 	 *
-	 * @return ML_Export
+	 * @return Export
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {

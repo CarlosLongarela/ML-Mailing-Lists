@@ -7,6 +7,8 @@
  * @since 1.0.1
  */
 
+namespace ML_Mailing_Lists;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -219,7 +221,7 @@ function ml_log_activity( $action, $details = array(), $user_id = 0 ) {
 		'action'    => sanitize_text_field( $action ),
 		'details'   => $details,
 		'user_id'   => $user_id,
-		'ip'        => ML_Security::get_user_ip(),
+		'ip'        => Security::get_user_ip(),
 	);
 
 	$logs   = get_option( 'ml_activity_logs', array() );

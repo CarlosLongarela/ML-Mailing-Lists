@@ -7,21 +7,23 @@
  * @since 1.0.1
  */
 
+namespace ML_Mailing_Lists;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
 /**
- * Class ML_Email_Sender
+ * Email_Sender class
  *
  * Handles email sending functionality.
  */
-class ML_Email_Sender {
+class Email_Sender {
 
 	/**
 	 * Unique instance of the class
 	 *
-	 * @var ML_Email_Sender
+	 * @var Email_Sender
 	 */
 	private static $instance = null;
 
@@ -35,7 +37,7 @@ class ML_Email_Sender {
 	/**
 	 * Get unique instance of the class
 	 *
-	 * @return ML_Email_Sender
+	 * @return Email_Sender
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {

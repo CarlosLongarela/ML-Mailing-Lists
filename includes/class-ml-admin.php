@@ -3,25 +3,27 @@
  * Admin functionality for ML Mailing Lists
  *
  * @package ML_Mailing_Lists
- * @subpackage Admin
+ * @namespace ML_Mailing_Lists
  * @since 1.0.1
  */
+
+namespace ML_Mailing_Lists;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
 /**
- * Class ML_Admin
+ * Class Admin
  *
  * Handles the admin functionality for the plugin.
  */
-class ML_Admin {
+class Admin {
 
 	/**
 	 * Unique instance of the class
 	 *
-	 * @var ML_Admin
+	 * @var Admin
 	 */
 	private static $instance = null;
 

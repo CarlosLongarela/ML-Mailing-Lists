@@ -2,22 +2,28 @@
 /**
  * Shortcode class for ML Mailing Lists
  *
- * @package ML Mailing Lists
+ * @package ML_Mailing_Lists
+ * @namespace ML_Mailing_Lists
+ * @since 1.0.1
  */
 
+namespace ML_Mailing_Lists;
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
 
 /**
- * ML_Shortcode class
+ * Class Shortcode
+ *
+ * Handles subscription form shortcode functionality.
  */
-class ML_Shortcode {
+class Shortcode {
 
 	/**
 	 * Unique instance of the class
 	 *
-	 * @var ML_Shortcode
+	 * @var Shortcode
 	 */
 	private static $instance = null;
 
@@ -31,7 +37,7 @@ class ML_Shortcode {
 	/**
 	 * Get unique instance of the class
 	 *
-	 * @return ML_Shortcode
+	 * @return Shortcode
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {
@@ -87,7 +93,7 @@ class ML_Shortcode {
 		}
 
 		// Generate nonce for security.
-		$nonce = ML_Security::create_nonce( 'ml_subscription_' . $atts['list_id'] );
+		$nonce = Security::create_nonce( 'ml_subscription_' . $atts['list_id'] );
 
 		// Form HTML.
 		ob_start();
@@ -162,30 +168,30 @@ class ML_Shortcode {
 
 		// Verify nonce for security.
 		$list_id_post = intval( $_POST['ml_list_id'] );
-		$nonce        = ML_Security::sanitize_text_input( $_POST['ml_nonce'] );
+		$nonce        = Security::sanitize_text_input( $_POST['ml_nonce'] );
 
-		if ( ! ML_Security::verify_nonce( $nonce, 'ml_subscription_' . $list_id_post ) ) {
+		if ( ! Security::verify_nonce( $nonce, 'ml_subscription_' . $list_id_post ) ) {
 			return '<div class="ml-mensaje error">Erro de seguridade. Por favor, inténteo de novo.</div>';
 		}
 
 		// Verify honeypot.
 		$honeypot = isset( $_POST['ml_honeypot'] ) ? $_POST['ml_honeypot'] : '';
-		if ( ML_Security::is_honeypot_triggered( $honeypot ) ) {
+		if ( Security::is_honeypot_triggered( $honeypot ) ) {
 			return '<div class="ml-mensaje error">Detección de spam. Solicitude rexeitada.</div>';
 		}
 
 		// Get user IP.
-		$user_ip = ML_Security::get_user_ip();
+		$user_ip = Security::get_user_ip();
 
 		// Verify rate limit.
-		if ( ! ML_Security::check_rate_limit( $user_ip ) ) {
+		if ( ! Security::check_rate_limit( $user_ip ) ) {
 			return '<div class="ml-mensaje error">Demasiados intentos. Por favor, agarde unha hora antes de volver intentalo.</div>';
 		}
 
 		// Sanitize input data.
-		$name    = ML_Security::sanitize_text_input( $_POST['ml_name'] );
-		$surname = ML_Security::sanitize_text_input( $_POST['ml_surname'] );
-		$email   = ML_Security::sanitize_email_input( $_POST['ml_mail'] );
+		$name    = Security::sanitize_text_input( $_POST['ml_name'] );
+		$surname = Security::sanitize_text_input( $_POST['ml_surname'] );
+		$email   = Security::sanitize_email_input( $_POST['ml_mail'] );
 		$list_id = $list_id_post;
 
 		// Validations.
@@ -195,7 +201,7 @@ class ML_Shortcode {
 			'email'   => $email,
 		);
 
-		$validation_result = ML_Security::validate_subscription_data( $validation_data );
+		$validation_result = Security::validate_subscription_data( $validation_data );
 		if ( ! $validation_result['valid'] ) {
 			return '<div class="ml-mensaje error">' . esc_html( $validation_result['message'] ) . '</div>';
 		}
@@ -234,7 +240,7 @@ class ML_Shortcode {
 		wp_set_post_terms( $post_id, array( $list_id ), 'ml_lista' );
 
 		// Update rate limit counter.
-		ML_Security::increment_rate_limit( $user_ip );
+		Security::increment_rate_limit( $user_ip );
 
 		// Fire action hook for extensibility.
 		do_action( 'ml_subscription_created', $post_id, $email, $list_id );

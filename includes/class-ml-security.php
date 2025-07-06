@@ -2,22 +2,28 @@
 /**
  * Security class for ML Mailing Lists
  *
- * @package ML Mailing Lists
+ * @package ML_Mailing_Lists
+ * @namespace ML_Mailing_Lists
+ * @since 1.0.1
  */
 
+namespace ML_Mailing_Lists;
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
 
 /**
- * ML_Security class
+ * Class Security
+ *
+ * Handles all security-related functionality.
  */
-class ML_Security {
+class Security {
 
 	/**
 	 * Unique instance of the class
 	 *
-	 * @var ML_Security
+	 * @var Security
 	 */
 	private static $instance = null;
 
@@ -31,7 +37,7 @@ class ML_Security {
 	/**
 	 * Get unique instance of the class
 	 *
-	 * @return ML_Security
+	 * @return Security
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {

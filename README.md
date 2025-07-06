@@ -171,11 +171,11 @@ add_filter( 'ml_subscription_email', function( $email, $list_id ) {
     // Bloquear dominios específicos
     $blocked_domains = ['example.com', 'spam.com'];
     $domain = substr(strrchr($email, '@'), 1);
-    
+
     if (in_array($domain, $blocked_domains)) {
         return false; // Esto activará unha validación de erro
     }
-    
+
     return $email;
 }, 10, 2 );
 ```
@@ -185,9 +185,9 @@ add_filter( 'ml_subscription_email', function( $email, $list_id ) {
 add_action( 'ml_subscription_created', function( $post_id, $email, $list_id ) {
     // Enviar notificación por Slack, Discord, etc.
     $list_name = get_term( $list_id, 'ml_lista' )->name;
-    
+
     error_log( "Nova subscrición en '{$list_name}': {$email}" );
-    
+
     // Ou enviar webhook
     wp_remote_post( 'https://hooks.slack.com/services/...', [
         'body' => json_encode([
@@ -213,7 +213,7 @@ add_action( 'ml_subscription_created', function( $post_id, $email, $list_id ) {
   - Exportar datos
   - Acceder ás funcionalidades de administración
 
-## 📁 Estrutura de Arquivos
+## 📁 Estrutura de Arquivos con Namespaces
 
 ### Estrutura modular do plugin
 
@@ -221,30 +221,48 @@ add_action( 'ml_subscription_created', function( $post_id, $email, $list_id ) {
 ml-mailing-lists/
 ├── ml-mailing-lists.php           # Arquivo principal - Cargador do plugin
 ├── README.md                      # Documentación completa
-└── includes/                      # Classes modulares
-    ├── class-ml-core.php          # Clase principal - Xestor de dependencias
-    ├── class-ml-shortcode.php     # Xestión de shortcodes de subscrición
-    ├── class-ml-security.php      # Sistema de seguridade e validación
-    ├── class-ml-admin.php         # Interface de administración
-    ├── class-ml-email-sender.php  # Xestión de envío de emails
-    ├── class-ml-export.php        # Sistema de exportación de datos
-    └── functions.php              # Funcións auxiliares globais
+└── includes/                      # Classes modulares con namespace ML_Mailing_Lists
+    ├── class-ml-core.php          # Core - Xestor principal de dependencias
+    ├── class-ml-shortcode.php     # Shortcode - Xestión de formularios
+    ├── class-ml-security.php      # Security - Sistema de seguridade
+    ├── class-ml-admin.php         # Admin - Interface de administración
+    ├── class-ml-email-sender.php  # Email_Sender - Xestión de envío
+    ├── class-ml-export.php        # Export - Sistema de exportación
+    └── functions.php              # Funcións auxiliares con namespace
+```
+
+### Estrutura con namespaces
+
+Todas as clases están baixo o namespace `ML_Mailing_Lists` para evitar conflitos:
+
+```php
+namespace ML_Mailing_Lists;
+
+// Inicialización do plugin
+\ML_Mailing_Lists\Core::get_instance();
+
+// Acceso ás clases
+\ML_Mailing_Lists\Shortcode::get_instance();
+\ML_Mailing_Lists\Security::get_instance();
+\ML_Mailing_Lists\Admin::get_instance();
+\ML_Mailing_Lists\Email_Sender::get_instance();
+\ML_Mailing_Lists\Export::get_instance();
 ```
 
 ### Descrición das clases
 
-#### 🔧 `ML_Core` (class-ml-core.php)
+#### 🔧 `ML_Mailing_Lists\Core` (class-ml-core.php)
 - **Función principal**: Cargador e inicializador do plugin
-- **Patrón**: Singleton
+- **Patrón**: Singleton con namespace
 - **Responsabilidades**:
   - Cargar todas as dependencias
   - Inicializar as clases modulares
   - Xestionar hooks de activación/desactivación
   - Cargar traduccións
 
-#### 📝 `ML_Shortcode` (class-ml-shortcode.php)
+#### 📝 `ML_Mailing_Lists\Shortcode` (class-ml-shortcode.php)
 - **Función principal**: Xestión de formularios de subscrición
-- **Patrón**: Singleton
+- **Patrón**: Singleton con namespace
 - **Responsabilidades**:
   - Rexistrar e procesar shortcodes
   - Xerar HTML dos formularios
@@ -303,7 +321,7 @@ ml-mailing-lists/
 
 ### Patrón de deseño implementado
 
-O plugin segue unha **arquitectura modular basada no patrón Singleton** que garante:
+O plugin segue unha **arquitectura modular baseada no patrón Singleton** que garante:
 
 - **Unha soa instancia** de cada clase principal
 - **Carga eficiente** de recursos
@@ -421,6 +439,15 @@ $logs = get_option( 'ml_email_logs', array() );
 
 ## 📝 Changelog
 
+### Versión 1.0.2 - Namespaces e Modernización Completa
+- ✅ **Implementación de namespaces** `ML_Mailing_Lists` en todas as clases
+- ✅ **Arquitectura moderna** seguindo PSR-4 con namespace
+- ✅ **Actualización de clases** a nomes sen prefixo (Security, Shortcode, etc.)
+- ✅ **Referencias actualizadas** en todo o código para usar namespaces
+- ✅ **Documentación actualizada** con exemplos de namespace
+- ✅ **Mellor organizacón** evitando conflitos de nomes
+- ✅ **Compatibilidade mantida** con todas as funcionalidades
+
 ### Versión 1.0.1 - Refactorización Modular
 - ✅ **Arquitectura modular completa** con clases separadas
 - ✅ **Patrón Singleton** implementado en todas as clases principais
@@ -450,19 +477,21 @@ $logs = get_option( 'ml_email_logs', array() );
 
 ## 👨‍💻 Desenvolvemento
 
-## 👨‍💻 Desenvolvemento
+### Arquitectura moderna con namespaces
 
-### Arquitectura modular
+O plugin está deseñado cunha **arquitectura moderna con namespaces** que facilita:
 
-O plugin está deseñado cunha **arquitectura modular moderna** que facilita:
-
-- **Mantemento**: Cada funcionalidade en súa propia clase
+- **Mantemento**: Cada funcionalidade en súa propia clase con namespace
 - **Testing**: Classes independentes fáciles de probar
 - **Extensibilidade**: Novos módulos pódense engadir facilmente
+- **Compatibilidade**: Namespaces evitan conflitos con outros plugins
 - **Legibilidade**: Código organizado e ben documentado
+- **Namespaces**: Evita conflitos de nomes entre plugins
+- **Autoloading**: Estrutura preparada para autoloaders PSR-4
 
 ### Estándares implementados
 
+- ✅ **Namespaces PSR-4** para organización do código
 - ✅ **Patrón Singleton** para clases principais
 - ✅ **Hooks e filtros nativos** de WordPress
 - ✅ **Sanitización e validación** estricta
@@ -473,12 +502,26 @@ O plugin está deseñado cunha **arquitectura modular moderna** que facilita:
 - ✅ **Prevención de execución directa** con ABSPATH
 - ✅ **Compatibilidade con PHP 7.4+**
 
+### Estrutura de namespaces
+
+```php
+namespace ML_Mailing_Lists;
+
+// Clases principais
+Core::class           // \ML_Mailing_Lists\Core
+Security::class       // \ML_Mailing_Lists\Security
+Shortcode::class      // \ML_Mailing_Lists\Shortcode
+Admin::class          // \ML_Mailing_Lists\Admin
+Email_Sender::class   // \ML_Mailing_Lists\Email_Sender
+Export::class         // \ML_Mailing_Lists\Export
+```
+
 ### Clases principais e os seus métodos
 
-#### ML_Core
+#### ML_Mailing_Lists\Core
 ```php
 // Inicialización do plugin
-ML_Core::get_instance();
+\ML_Mailing_Lists\Core::get_instance();
 
 // Métodos principais
 ->init_plugin()          // Inicializa todos os módulos
@@ -486,22 +529,25 @@ ML_Core::get_instance();
 ->load_textdomain()      // Carga traduccións
 ```
 
-#### ML_Security
+#### ML_Mailing_Lists\Security
 ```php
 // Métodos de seguridade (estáticos)
-ML_Security::verify_nonce($nonce, $action);
-ML_Security::create_nonce($action);
-ML_Security::check_rate_limit($ip);
-ML_Security::validate_subscription_data($data);
-ML_Security::get_user_ip();
+use ML_Mailing_Lists\Security;
+
+Security::verify_nonce($nonce, $action);
+Security::create_nonce($action);
+Security::check_rate_limit($ip);
+Security::validate_subscription_data($data);
+Security::get_user_ip();
 ```
 
-#### ML_Shortcode
+#### ML_Mailing_Lists\Shortcode
 ```php
 // Xestión de shortcodes
-->subscription_form_shortcode($atts);
-->process_subscription_form();
-->get_subscription_form_css($css_class);
+use ML_Mailing_Lists\Shortcode;
+
+$shortcode = Shortcode::get_instance();
+$shortcode->subscription_form_shortcode($atts);
 ```
 
 ### Estrutura de datos
@@ -510,7 +556,7 @@ ML_Security::get_user_ip();
 ```php
 // Metadatos almacenados
 'nome'               => string    // Nome do subscritor
-'apelido'            => string    // Apelido do subscritor  
+'apelido'            => string    // Apelido do subscritor
 'correo'             => string    // Email do subscritor
 'data_subscripcion'  => datetime  // Data de subscrición
 'ml_ip_address'      => string    // IP de rexistro
@@ -569,7 +615,7 @@ As contribucións son benvidas. Por favor:
 3. Segue os estándares de codificación de WordPress
 4. Envía un pull request
 
-## 📄 Licencia
+## 📄 Licenza
 
 GPL2 - Consulta el archivo de licencia para más detalles.
 
@@ -587,3 +633,64 @@ GPL2 - Consulta el archivo de licencia para más detalles.
 ---
 
 *Para soporte técnico ou consultas, contacta a través do sitio web do autor.*
+
+---
+
+### 🔧 Uso avanzado con namespaces
+
+#### Importar clases específicas
+
+```php
+// Importar clases específicas para uso local
+use ML_Mailing_Lists\Security;
+use ML_Mailing_Lists\Shortcode;
+
+// Agora podes usar as clases sen o namespace completo
+$nonce = Security::create_nonce('mi_accion');
+$shortcode = Shortcode::get_instance();
+```
+
+#### Extensión do plugin
+
+```php
+// Crear un módulo personalizado que extenda a funcionalidade
+namespace ML_Mailing_Lists\Extensions;
+
+use ML_Mailing_Lists\Core;
+use ML_Mailing_Lists\Security;
+
+class Mi_Extension {
+    public function __construct() {
+        // Asegúrate de que o plugin principal está cargado
+        if (class_exists('\ML_Mailing_Lists\Core')) {
+            $this->init();
+        }
+    }
+
+    private function init() {
+        // Usar as clases do plugin principal
+        add_action('ml_subscription_created', array($this, 'on_subscription'));
+    }
+
+    public function on_subscription($post_id, $email, $list_id) {
+        // A túa lógica personalizada aquí
+    }
+}
+```
+
+#### Hooks e filtros con namespace
+
+```php
+// Os hooks seguen funcionando igual, pero as clases usan namespace
+add_filter('ml_subscription_email', function($email, $list_id) {
+    // Validación adicional usando a clase Security
+    return \ML_Mailing_Lists\Security::sanitize_email_input($email);
+}, 10, 2);
+
+// Hook para despois de crear unha subscrición
+add_action('ml_subscription_created', function($post_id, $email, $list_id) {
+    // Obter instancia das clases usando namespace
+    $email_sender = \ML_Mailing_Lists\Email_Sender::get_instance();
+    // Usar a instancia...
+}, 10, 3);
+```

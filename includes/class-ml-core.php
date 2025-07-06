@@ -1,23 +1,29 @@
 <?php
 /**
- * Main class for ML Mailing Lists plugin
+ * Main core class for ML Mailing Lists plugin
  *
- * @package ML Mailing Lists
+ * @package ML_Mailing_Lists
+ * @namespace ML_Mailing_Lists
+ * @since 1.0.1
  */
 
+namespace ML_Mailing_Lists;
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
 
 /**
- * Main ML_Core class
+ * Class Core
+ *
+ * Main plugin loader and dependency manager.
  */
-class ML_Core {
+class Core {
 
 	/**
 	 * Single instance of the class
 	 *
-	 * @var ML_Core
+	 * @var Core
 	 */
 	private static $instance = null;
 
@@ -31,7 +37,7 @@ class ML_Core {
 	/**
 	 * Get single instance of the class
 	 *
-	 * @return ML_Core
+	 * @return Core
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {
@@ -75,20 +81,20 @@ class ML_Core {
 	 */
 	public function init_plugin() {
 		// Initialize security.
-		ML_Security::get_instance();
+		Security::get_instance();
 
 		// Initialize shortcode.
-		ML_Shortcode::get_instance();
+		Shortcode::get_instance();
 
 		// Initialize export functionality.
-		ML_Export::get_instance();
+		Export::get_instance();
 
 		// Initialize email sender.
-		ML_Email_Sender::get_instance();
+		Email_Sender::get_instance();
 
 		// Initialize admin (only in admin area).
 		if ( is_admin() ) {
-			ML_Admin::get_instance();
+			Admin::get_instance();
 		}
 	}
 
