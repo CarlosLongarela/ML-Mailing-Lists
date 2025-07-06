@@ -336,7 +336,7 @@ WordPress carga → ml-mailing-lists.php → ML_Core::get_instance()
                                       Carga dependencias
                                            ↓
                     ┌─────────────────────────────────────────┐
-                    │          ML_Core::init_plugin()         │
+                    │          ML_Core::init_plugin()        │
                     └─────────────────────────────────────────┘
                                            ↓
     ┌─────────────────┬─────────────────┬─────────────────┬─────────────────┐
